@@ -1,9 +1,10 @@
 # chatbot.py
 import requests
-from finance import suggest_budget, calculate_savings_growth, get_budget_data, get_savings_growth_data
+import os  # For environment variables
+from finance import suggest_budget, calculate_savings_growth
 
-# Hugging Face API setup
-HF_API_KEY = "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"  # Replace with your key
+# Use environment variable for the API key (set in your system or Streamlit)
+HF_API_KEY = os.getenv("HF_API_KEY", "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")  # Fallback for testing
 HF_API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"  # Conversational model
 
 def call_hf_api(prompt):
