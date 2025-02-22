@@ -4,7 +4,7 @@ body {
     color: #f5f5f5;
 }
 
-.content-wrapper {
+/* .content-wrapper {
     max-width: 800px;
     margin: auto;
     padding: 20px;
@@ -12,12 +12,13 @@ body {
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
+ */
 
 .chat-message {
     padding: 10px;
     margin: 10px 0;
     border-radius: 10px;
-}
+} 
 
 .coach-message {
     background-color: #3c3c3c;
@@ -29,7 +30,7 @@ body {
     background-color: #00d4ff;
     text-align: right;
     color: #1e1e1e;
-}
+} 
 
 input[type="text"] {
     width: 100%;
@@ -67,40 +68,6 @@ button:hover {
     padding: 0;
     margin: 0;
 }
-
-.cube-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    pointer-events: none;
-    z-index: -1;
-    opacity: 0.5;
-}
-
-.cube {
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    transform-style: preserve-3d;
-    animation: rotate 20s infinite linear;
-}
-
-.cube div {
-    position: absolute;
-    width: 50px;
-    height: 50px;
-    background: rgba(0, 212, 255, 0.7);
-    border: 1px solid rgba(0, 212, 255, 0.9);
-}
-
-.cube .front  { transform: translateZ(25px); }
-.cube .back   { transform: rotateY(180deg) translateZ(25px); }
-.cube .right  { transform: rotateY(90deg) translateZ(25px); }
-.cube .left   { transform: rotateY(-90deg) translateZ(25px); }
-.cube .top    { transform: rotateX(90deg) translateZ(25px); }
-.cube .bottom { transform: rotateX(-90deg) translateZ(25px); }
 
 @keyframes rotate {
     0% { transform: rotateX(0deg) rotateY(0deg); }
