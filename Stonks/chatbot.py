@@ -3,7 +3,11 @@ import requests
 import os
 from alpha_vantage.fundamentaldata import FundamentalData
 from finance import suggest_budget, calculate_savings_growth
+import finnhub
+import time
 
+
+finnhub_client = finnhub.Client(api_key="cut1topr01qrsirk847gcut1topr01qrsirk8480")
 HF_API_KEY = os.getenv("HF_API_KEY", "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")
 HF_API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"
 
@@ -11,11 +15,25 @@ HF_API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-I
 AV_API_KEY = os.getenv("AV_API_KEY", "your_alpha_vantage_key_here")
 
 def get_market_sentiment():
-    fd = FundamentalData(key=AV_API_KEY, output_format='pandas')
-    # Example: Fetch news sentiment or stock data (e.g., S&P 500)
-    news, _ = fd.get_news_sentiment(symbol='SPY', limit=5)
-    return " ".join([f"News: {row['title']} - Sentiment: {row['buzz']['sentiment']}" for _, row in news.iterrows()])
-
+    try:
+        # Fetch news sentiment for SPY (S&P 500 ETF)
+        news, _ = finnhub_client.news_sentiment(symbol='SPY', _from=str(int(time.time() - 86400)), to=str(int(time.time())))
+        if not news or 'buzz' not in news:
+            return "unknown (no data available)"
+        
+        # Analyze sentiment based on buzz scores (e.g., positive, negative, neutral)
+        buzz = news['buzz']
+        sentiment_score = buzz.get('sentiment_score', 0)
+        if sentiment_score > 0.1:
+            return "positive"
+        elif sentiment_score < -0.1:
+            return "negative"
+        else:
+            return "neutral"
+    except Exception as e:
+        print(f"Error fetching market sentiment: {e}")
+        return "unknown (could not fetch data)"
+    
 def call_hf_api(prompt):
     headers = {"Authorization": f"Bearer {HF_API_KEY}", "Content-Type": "application/json"}
     payload = {
