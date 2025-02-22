@@ -1,0 +1,48 @@
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: black;
+    color: #333;
+}
+
+.stTextInput > div > input {
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    padding: 8px;
+    font-size: 16px;
+}
+
+.stNumberInput > div > input {
+    border: 2px solid #007bff;
+    border-radius: 8px;
+    padding: 8px;
+}
+
+.stButton > button {
+    background-color: #007bff;
+    color: black;
+    border-radius: 8px;
+    padding: 10px 20px;
+    font-weight: bold;
+}
+
+.stButton > button:hover {
+    background-color: #0056b3;
+}
+
+h1, h2, h3 {
+    color: #007bff;
+    font-weight: 600;
+}
+
+.stMetric {
+    background-color: black;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 10px;
+}
+
+.stExpander {
+    background-color: black;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
