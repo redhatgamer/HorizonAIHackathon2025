@@ -1,6 +1,7 @@
 import streamlit as st
 from chatbot import process_input
 import stocks
+import mortgage_calculator
 
 st.set_page_config(page_title="Financial Coach Chatbot", layout="wide", initial_sidebar_state="collapsed")
 
@@ -174,8 +175,7 @@ elif menu_option == "Stocks":
     stocks.display_stocks()
 
 elif menu_option == "Mortgage Calculator":
-    st.title("Mortgage Calculator")
-    st.markdown("Mortgage calculator functionality will be here.")
+    mortgage_calculator.display_mortgage_calculator()
 
 st.markdown('</div>', unsafe_allow_html=True)  # Close content-wrapper
 st.markdown('<script>window.scrollTo(0, document.body.scrollHeight);</script>', unsafe_allow_html=True)
