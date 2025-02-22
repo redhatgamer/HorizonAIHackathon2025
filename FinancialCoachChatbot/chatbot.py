@@ -1,11 +1,20 @@
-# chatbot.py
+# chatbot.py (partial update)
 import requests
-import os  # For environment variables
+import os
+from alpha_vantage.fundamentaldata import FundamentalData
 from finance import suggest_budget, calculate_savings_growth
 
-# Use environment variable for the API key (set in your system or Streamlit)
-HF_API_KEY = os.getenv("HF_API_KEY", "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")  # Fallback for testing
-HF_API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"  # Conversational model
+HF_API_KEY = os.getenv("HF_API_KEY", "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")
+HF_API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"
+
+# Free Alpha Vantage API key (sign up at alphavantage.co)
+AV_API_KEY = os.getenv("AV_API_KEY", "your_alpha_vantage_key_here")
+
+def get_market_sentiment():
+    fd = FundamentalData(key=AV_API_KEY, output_format='pandas')
+    # Example: Fetch news sentiment or stock data (e.g., S&P 500)
+    news, _ = fd.get_news_sentiment(symbol='SPY', limit=5)
+    return " ".join([f"News: {row['title']} - Sentiment: {row['buzz']['sentiment']}" for _, row in news.iterrows()])
 
 def call_hf_api(prompt):
     headers = {"Authorization": f"Bearer {HF_API_KEY}", "Content-Type": "application/json"}
@@ -35,21 +44,18 @@ def process_input(user_input, session_state):
             income = float(user_input.split("$")[-1].strip())
             session_state["waiting_for"] = "expenses"
             session_state["income"] = income
-            session_state["budget_data"] = None  # Clear old budget data
             chat_history.append(("Coach", "How much do you spend monthly? Please enter a number like '$600'."))
         except ValueError:
             chat_history.append(("Coach", "Please use numbers, like 'I earn $500'."))
     elif "save" in user_input:
         session_state["waiting_for"] = "savings_amount"
-        session_state["savings_data"] = None  # Clear old savings data
         chat_history.append(("Coach", "How much can you save monthly? Please enter a number like '$50'."))
     elif session_state.get("waiting_for") == "expenses":
         try:
             expenses = float(user_input.split("$")[-1].strip())
             budget = suggest_budget(session_state["income"], expenses)
-            budget_data = get_budget_data(session_state["income"])
-            session_state["budget_data"] = budget_data
-            prompt = f"As a financial coach, respond to this user input with a helpful explanation and motivational nudge: The user’s budget is {budget}. What advice can you give?"
+            market_sentiment = get_market_sentiment()
+            prompt = f"As a financial coach, respond to this user input with a helpful explanation and motivational nudge: The user’s budget is {budget}. Consider this market context: {market_sentiment}. What advice can you give?"
             response = call_hf_api(prompt)
             chat_history.append(("Coach", response))
             session_state["waiting_for"] = None
@@ -67,9 +73,8 @@ def process_input(user_input, session_state):
         try:
             months = int(user_input)
             savings = calculate_savings_growth(session_state["savings_amount"], months)
-            savings_data = get_savings_growth_data(session_state["savings_amount"], months)
-            session_state["savings_data"] = savings_data
-            prompt = f"As a financial coach, respond to this user input with a helpful explanation and motivational nudge: The user’s savings plan is {savings}. What advice can you give?"
+            market_sentiment = get_market_sentiment()
+            prompt = f"As a financial coach, respond to this user input with a helpful explanation and motivational nudge: The user’s savings plan is {savings}. Consider this market context: {market_sentiment}. What advice can you give?"
             response = call_hf_api(prompt)
             chat_history.append(("Coach", response))
             session_state["waiting_for"] = None
