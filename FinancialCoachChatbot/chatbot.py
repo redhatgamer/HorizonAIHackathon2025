@@ -1,19 +1,27 @@
 # chatbot.py
-from finance import suggest_budget, calculate_savings_growth
+import requests
+from finance import suggest_budget, calculate_savings_growth, get_budget_data, get_savings_growth_data
 
-# Response dictionary with nudges
-responses = {
-    "hi": "Hey there! I’m your Financial Coach—here to help you win with money. What’s on your mind?",
-    "how do i budget": "Let’s craft a budget you’ll actually stick to! What’s your monthly income (e.g., 'I earn $500')?",
-    "how do i save": "Saving’s your ticket to freedom! How much can you set aside each month?"
-}
+# Hugging Face API setup
+HF_API_KEY = "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"  # Replace with your key
+HF_API_URL = "https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.2"  # Conversational model
+
+def call_hf_api(prompt):
+    headers = {"Authorization": f"Bearer {HF_API_KEY}", "Content-Type": "application/json"}
+    payload = {
+        "inputs": prompt,
+        "parameters": {"max_length": 200, "temperature": 0.7, "top_p": 0.95}
+    }
+    try:
+        response = requests.post(HF_API_URL, headers=headers, json=payload)
+        response.raise_for_status()
+        return response.json()[0]["generated_text"].strip()
+    except Exception as e:
+        return f"Error with API: {e}"
 
 def process_input(user_input, session_state):
-    """Process user input and update session state."""
-    user_input = user_input.lower().strip()
     chat_history = session_state.get("chat_history", [])
-    
-    # Add user message
+    user_input = user_input.lower().strip()
     chat_history.append(("You", user_input))
 
     if user_input == "exit":
@@ -21,24 +29,28 @@ def process_input(user_input, session_state):
         session_state["chat_history"] = chat_history
         session_state["exit"] = True
         return
-    elif user_input in responses:
-        chat_history.append(("Coach", responses[user_input]))
     elif "i earn" in user_input or "my income is" in user_input:
         try:
             income = float(user_input.split("$")[-1].strip())
             session_state["waiting_for"] = "expenses"
             session_state["income"] = income
-            chat_history.append(("Coach", "How much do you spend monthly? Type a number like '$600'."))
+            session_state["budget_data"] = None  # Clear old budget data
+            chat_history.append(("Coach", "How much do you spend monthly? Please enter a number like '$600'."))
         except ValueError:
             chat_history.append(("Coach", "Please use numbers, like 'I earn $500'."))
     elif "save" in user_input:
         session_state["waiting_for"] = "savings_amount"
-        chat_history.append(("Coach", "How much can you save monthly? Type a number like '$50'."))
+        session_state["savings_data"] = None  # Clear old savings data
+        chat_history.append(("Coach", "How much can you save monthly? Please enter a number like '$50'."))
     elif session_state.get("waiting_for") == "expenses":
         try:
             expenses = float(user_input.split("$")[-1].strip())
             budget = suggest_budget(session_state["income"], expenses)
-            chat_history.append(("Coach", budget))
+            budget_data = get_budget_data(session_state["income"])
+            session_state["budget_data"] = budget_data
+            prompt = f"As a financial coach, respond to this user input with a helpful explanation and motivational nudge: The user’s budget is {budget}. What advice can you give?"
+            response = call_hf_api(prompt)
+            chat_history.append(("Coach", response))
             session_state["waiting_for"] = None
         except ValueError:
             chat_history.append(("Coach", "Please use a number, like '$600'."))
@@ -47,18 +59,24 @@ def process_input(user_input, session_state):
             amount = float(user_input.split("$")[-1].strip())
             session_state["waiting_for"] = "savings_months"
             session_state["savings_amount"] = amount
-            chat_history.append(("Coach", "For how many months? Type a number like '12'."))
+            chat_history.append(("Coach", "For how many months? Please enter a number like '12'."))
         except ValueError:
             chat_history.append(("Coach", "Please use a number, like '$50'."))
     elif session_state.get("waiting_for") == "savings_months":
         try:
             months = int(user_input)
             savings = calculate_savings_growth(session_state["savings_amount"], months)
-            chat_history.append(("Coach", savings))
+            savings_data = get_savings_growth_data(session_state["savings_amount"], months)
+            session_state["savings_data"] = savings_data
+            prompt = f"As a financial coach, respond to this user input with a helpful explanation and motivational nudge: The user’s savings plan is {savings}. What advice can you give?"
+            response = call_hf_api(prompt)
+            chat_history.append(("Coach", response))
             session_state["waiting_for"] = None
         except ValueError:
             chat_history.append(("Coach", "Please enter a valid number, like '12'."))
     else:
-        chat_history.append(("Coach", "Hmm, let’s try that again. Ask about budgeting or saving!"))
+        prompt = f"As a financial coach, respond to '{user_input}' with a helpful answer and a motivational nudge."
+        response = call_hf_api(prompt)
+        chat_history.append(("Coach", response))
     
     session_state["chat_history"] = chat_history
