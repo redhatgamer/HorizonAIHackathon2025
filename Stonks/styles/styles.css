@@ -107,3 +107,16 @@ button:hover {
 ::-webkit-scrollbar-thumb:hover {
     background: #00a3cc;
 }
+
+
+.sidebar-character {
+    position: fixed;
+    bottom: 20px;
+    left: -150px;
+    width: 100px;
+    transition: left 0.5s ease-in-out;
+}
+
+.sidebar-open .sidebar-character {
+    left: 20px;
+}
