@@ -2,6 +2,7 @@ import streamlit as st
 from chatbot import process_input
 import stocks
 import mortgage_calculator
+import housing_explorer  # New module for the housing tool
 import logging
 from datetime import datetime
 
@@ -46,7 +47,7 @@ with st.sidebar:
     st.markdown("Navigate your financial journey:")
     menu_option = st.selectbox(
         "Choose Your Path",
-        ["Home", "Stocks", "Mortgage Calculator"],
+        ["Home", "Stocks", "Mortgage Calculator", "Housing Explorer"],
         help="Pick a tool to boost your financial game!"
     )
     st.markdown(f"**Date:** {datetime.now().strftime('%B %d, %Y')}")
@@ -155,6 +156,14 @@ elif menu_option == "Mortgage Calculator":
     except Exception as e:
         st.error("Mortgage calculator hit a snag. Check back soon!")
         logger.error(f"Mortgage calculator error: {e}")
+
+# Housing Explorer Section
+elif menu_option == "Housing Explorer":
+    try:
+        housing_explorer.display_housing_explorer()
+    except Exception as e:
+        st.error("Housing Explorer hit a glitch. Try again soon!")
+        logger.error(f"Housing Explorer error: {e}")
 
 # Footer and cleanup
 st.markdown("""
