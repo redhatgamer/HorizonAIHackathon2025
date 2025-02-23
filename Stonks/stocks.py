@@ -2,6 +2,7 @@ import streamlit as st
 import finnhub
 import os
 from datetime import datetime, timedelta
+import plotly.graph_objects as go
 
 # Initialize Finnhub client with API key from environment variable
 finnhub_client = finnhub.Client(api_key=os.getenv("FINNHUB_API_KEY", "cut1topr01qrsirk847gcut1topr01qrsirk8480"))
@@ -36,6 +37,14 @@ def fetch_company_news(symbol, days_back=365):
         st.error(f"Error fetching news for {symbol}: {e}")
         return []
 
+def fetch_historical_data(symbol, start_date, end_date):
+    """Fetch historical stock price data for a given symbol."""
+    try:
+        return finnhub_client.stock_candles(symbol.upper(), 'D', int(start_date.timestamp()), int(end_date.timestamp()))
+    except Exception as e:
+        st.error(f"Error fetching historical data for {symbol}: {e}")
+        return None
+
 def calculate_investment(symbol, amount, stock_price):
     """Calculate the number of shares that can be bought with a given investment amount."""
     if stock_price and stock_price['c'] > 0:
@@ -62,30 +71,56 @@ def display_stock_dashboard(symbol, investment_amount):
     company_profile = fetch_company_profile(symbol)
     if company_profile:
         st.subheader("Company Profile")
-        st.markdown(f"""
-            **Name:** {company_profile.get('name', 'N/A')}  
-            **Industry:** {company_profile.get('finnhubIndustry', 'N/A')}  
-            **Market Cap:** ${company_profile.get('marketCapitalization', 'N/A'):,.2f}B  
-            **Shares Outstanding:** {company_profile.get('shareOutstanding', 'N/A'):,.2f}M  
-            **Website:** [{company_profile.get('weburl', 'N/A')}]({company_profile.get('weburl', 'N/A')})
-        """)
+        col1, col2 = st.columns(2)
+        with col1:
+            st.markdown(f"""
+                **Name:** {company_profile.get('name', 'N/A')}  
+                **Industry:** {company_profile.get('finnhubIndustry', 'N/A')}  
+                **Market Cap:** ${company_profile.get('marketCapitalization', 'N/A'):,.2f}B  
+            """)
+        with col2:
+            st.markdown(f"""
+                **Shares Outstanding:** {company_profile.get('shareOutstanding', 'N/A'):,.2f}M  
+                **Website:** [{company_profile.get('weburl', 'N/A')}]({company_profile.get('weburl', 'N/A')})
+            """)
 
-    # Investment Calculator
-    if investment_amount > 0 and stock_price:
-        st.subheader("Investment Calculator")
-        st.write(calculate_investment(symbol, investment_amount, stock_price))
+    # Fetch and display historical stock price data
+    end_date = datetime.now()
+    start_date = end_date - timedelta(days=365)
+    historical_data = fetch_historical_data(symbol, start_date, end_date)
+    if historical_data and 'c' in historical_data:
+        st.subheader("Historical Stock Price")
+        fig = go.Figure()
+        fig.add_trace(go.Candlestick(
+            x=[datetime.fromtimestamp(ts) for ts in historical_data['t']],
+            open=historical_data['o'],
+            high=historical_data['h'],
+            low=historical_data['l'],
+            close=historical_data['c'],
+            name='Price'
+        ))
+        fig.update_layout(
+            title=f"{symbol.upper()} Stock Price",
+            xaxis_title="Date",
+            yaxis_title="Price (USD)",
+            xaxis_rangeslider_visible=False
+        )
+        st.plotly_chart(fig)
 
     # Fetch and display news
     news = fetch_company_news(symbol)
     if news:
         st.subheader("Latest News")
-        for article in news[:5]:
-            st.markdown(f"""
-                **{article.get('headline', 'No Title')}**  
-                {article.get('summary', 'No Summary')}  
-                [Read more]({article.get('url', '#')})  
-                ---
-            """)
+        news_cols = st.columns(2)
+        for i, article in enumerate(news[:4]):
+            with news_cols[i % 2]:
+                st.markdown(f"""
+                    <div class="news-card">
+                        <h4>{article.get('headline', 'No Title')}</h4>
+                        <p>{article.get('summary', 'No Summary')}</p>
+                        <a href="{article.get('url', '#')}" target="_blank">Read more</a>
+                    </div>
+                """, unsafe_allow_html=True)
 
 def display_stocks():
     """Main function to render the stocks page."""
@@ -96,10 +131,20 @@ def display_stocks():
     with open("styles/stocks.css") as f:
         st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
 
+    # List of popular stock symbols
+    popular_symbols = ["AAPL", "TSLA", "GOOGL", "AMZN", "MSFT", "NFLX", "FB", "NVDA", "BABA", "V"]
+
     # Stock symbol input
-    stock_symbol = st.text_input("Enter stock symbol:", placeholder="e.g., AAPL, TSLA", key="stock_symbol").strip()
+    col1, col2 = st.columns(2)
+    with col1:
+        stock_symbol = st.selectbox("Select stock symbol:", options=popular_symbols, index=0)
+    with col2:
+        custom_symbol = st.text_input("Or enter custom stock symbol:", placeholder="e.g., AAPL, TSLA", key="custom_symbol").strip()
     
-    # Investment amount input
+    # Use custom symbol if provided
+    if custom_symbol:
+        stock_symbol = custom_symbol
+
     investment_amount = st.number_input("Investment Amount (USD):", min_value=0.0, step=100.0, value=0.0, key="investment_amount")
 
     # Portfolio tracking feature
@@ -115,17 +160,37 @@ def display_stocks():
             }
             st.success(f"{stock_symbol.upper()} added to portfolio!")
 
-    # Display portfolio
-    if st.session_state.portfolio:
-        st.subheader("Your Portfolio")
-        total_value = 0
-        for symbol, data in st.session_state.portfolio.items():
-            current_price = fetch_stock_quote(symbol)['c']
-            value = current_price * data['shares']
-            total_value += value
-            st.write(f"{symbol}: {data['shares']:.2f} shares @ ${current_price:,.2f} = ${value:,.2f}")
-        st.write(f"**Total Portfolio Value:** ${total_value:,.2f}")
+    # Display investment calculator and portfolio side by side
+    col1, col2 = st.columns(2)
+    with col1:
+        if investment_amount > 0 and stock_price:
+            st.subheader("Investment Calculator")
+            investment_result = calculate_investment(stock_symbol, investment_amount, stock_price)
+            st.markdown(f"""
+                <div class="investment-card">
+                    <p>{investment_result}</p>
+                </div>
+            """, unsafe_allow_html=True)
+
+    with col2:
+        if st.session_state.portfolio:
+            st.subheader("Your Portfolio")
+            total_value = 0
+            for symbol, data in st.session_state.portfolio.items():
+                current_price = fetch_stock_quote(symbol)['c']
+                value = current_price * data['shares']
+                total_value += value
+                st.markdown(f"""
+                    <div class="portfolio-card">
+                        <h4>{symbol}</h4>
+                        <p>{data['shares']:.2f} shares @ ${current_price:,.2f} = ${value:,.2f}</p>
+                    </div>
+                """, unsafe_allow_html=True)
+            st.markdown(f"<div class='portfolio-total'>**Total Portfolio Value:** ${total_value:,.2f}</div>", unsafe_allow_html=True)
 
     # Display stock dashboard if a symbol is entered
     if stock_symbol:
         display_stock_dashboard(stock_symbol, investment_amount)
+
+if __name__ == "__main__":
+    display_stocks()

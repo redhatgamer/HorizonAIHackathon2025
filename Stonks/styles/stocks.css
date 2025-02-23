@@ -1,48 +1,116 @@
 body {
-    font-family: 'Commicscscscscscscscsc', sans-serif;
-    background-color: black;
-    color: #333;
+    font-family: 'Arial', sans-serif;
+    background-color: #121212;
+    color: #e0e0e0;
 }
 
-.stTextInput > div > input {
-    border: 2px solid #007bff;
-    border-radius: 8px;
-    padding: 8px;
-    font-size: 16px;
+h1, h2, h3, h4, h5, h6 {
+    color: #ffffff;
 }
 
-.stNumberInput > div > input {
-    border: 2px solid #007bff;
-    border-radius: 8px;
-    padding: 8px;
-}
-
-.stButton > button {
-    background-color: #007bff;
-    color: black;
-    border-radius: 8px;
+.stButton>button {
+    background-color: #1e88e5;
+    color: white;
+    border: none;
     padding: 10px 20px;
-    font-weight: bold;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+    border-radius: 8px;
 }
 
-.stButton > button:hover {
-    background-color: #0056b3;
-}
-
-h1, h2, h3 {
-    color: #007bff;
-    font-weight: 600;
+.stButton>button:hover {
+    background-color: #1565c0;
 }
 
 .stMetric {
-    background-color: black;
+    background-color: #1e1e1e;
+    border: 1px solid #333;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 10px;
+    margin: 10px 0;
+    color: #e0e0e0;
+}
+
+.stMarkdown {
+    margin: 10px 0;
+    color: #e0e0e0;
+}
+
+.stSubheader {
+    color: #1e88e5;
+    margin-top: 20px;
+}
+
+.stTextInput, .stNumberInput {
+    margin: 10px 0;
+    background-color: #333;
+    color: #e0e0e0;
+    border: 1px solid #555;
+    border-radius: 8px;
     padding: 10px;
 }
 
-.stExpander {
-    background-color: black;
+.news-card {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    padding: 15px;
+    margin: 10px 0;
+    color: #e0e0e0;
+}
+
+.news-card h4 {
+    margin: 0 0 10px;
+    color: #1e88e5;
+}
+
+.news-card p {
+    margin: 0 0 10px;
+}
+
+.news-card a {
+    color: #1e88e5;
+    text-decoration: none;
+}
+
+.news-card a:hover {
+    text-decoration: underline;
+}
+
+.portfolio-card {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    color: #e0e0e0;
+}
+
+.portfolio-card h4 {
+    margin: 0 0 10px;
+    color: #1e88e5;
+}
+
+.portfolio-card p {
+    margin: 0 0 10px;
+}
+
+.portfolio-total {
+    font-size: 18px;
+    font-weight: bold;
+    color: #1e88e5;
+    margin-top: 20px;
+}
+
+.investment-card {
+    background-color: #1e1e1e;
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 15px;
+    margin: 10px 0;
+    color: #e0e0e0;
 }
