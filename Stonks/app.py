@@ -85,20 +85,27 @@ if menu_option == "Home":
     if "last_interaction" not in st.session_state:
         st.session_state["last_interaction"] = datetime.now()
 
-    # Chat display with scrollable container
-    chat_container = st.container(height=400)
-    with chat_container:
-        for sender, message in st.session_state["chat_history"]:
-            if sender == "Coach Stonks":
-                st.markdown(
-                    f'<div class="chat-message coach-message"><b>{sender}:</b> {message}</div>',
-                    unsafe_allow_html=True
-                )
-            else:
-                st.markdown(
-                    f'<div class="chat-message user-message"><b>{sender}:</b> {message}</div>',
-                    unsafe_allow_html=True
-                )
+    # Option to enlarge chat
+    enlarge_chat = st.checkbox("Enlarge Chat", value=False)
+    chat_height = "600px" if enlarge_chat else "400px"
+
+    # Chat display with a scrollable container
+    chat_container_html = f'<div style="height: {chat_height}; overflow-y: auto; padding-right: 10px;">'
+    for sender, message in st.session_state["chat_history"]:
+        if sender == "Coach Stonks":
+            chat_container_html += (
+                f'<div class="chat-message coach-message">'
+                f'<b>{sender}:</b> {message}'
+                f'</div>'
+            )
+        else:
+            chat_container_html += (
+                f'<div class="chat-message user-message">'
+                f'<b>{sender}:</b> {message}'
+                f'</div>'
+            )
+    chat_container_html += '</div>'
+    st.markdown(chat_container_html, unsafe_allow_html=True)
 
     # Input form with validation and placeholder examples
     with st.form(key="chat_form", clear_on_submit=True):
