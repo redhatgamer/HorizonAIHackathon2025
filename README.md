@@ -1,7 +1,8 @@
-# Financial Coach Chatbot
+# Stonks
+2nd Place in Finance Track at Horizon AI Hackathon 
 
 ## Overview
-An AI-powered chatbot that helps users budget, save, and grow their money with personalized coaching and psychology-based nudges. Built for the Horizon AI Hackathon 2025 under the Finance & Economics theme.
+An AI-powered chatbot that helps users budget, save, and grow their money with personalized coaching and psychology-based nudges. 
 
 ## Features
 - **AI-Driven Budgeting**: Creates a 50/30/20 budget based on user income and expenses.
@@ -10,23 +11,7 @@ An AI-powered chatbot that helps users budget, save, and grow their money with p
 
 ## How to Run
 1. Ensure Python 3.7+ is installed.
-2. Navigate to the project folder: `cd FinancialCoachChatbot`
+2. Navigate to the project folder: `cd Stonks`
 3. Install the required dependencies:
-    ```sh
-    pip install matplotlib finnhub-python plotly alpha_vantage
-    ```
-4. Run the application:
-    ```sh
-    python main.py
-    ```
-5. Interact by typing questions like "How do I budget?" or "I earn $500".
-
-## Tech Stack
-- Python (no external dependencies)
-
-## Team
-- Carlos Mejia
-
-## Future Ideas
-- Add investment suggestions.
-- Integrate real-time financial data via APIs.
+   ```sh
+   pip install matplotlib finnhub-python plotly alpha_vantage
