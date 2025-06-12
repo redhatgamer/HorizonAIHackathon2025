@@ -1,5 +1,6 @@
 # Stonks
 2nd Place in Finance Track at Horizon AI Hackathon 
+Link to DevPost: https://devpost.com/software/stonks-dr5ape
 
 ## Overview
 An AI-powered chatbot that helps users budget, save, and grow their money with personalized coaching and psychology-based nudges. 
